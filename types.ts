@@ -2,6 +2,7 @@ export interface UserProfile {
   name: string;
   email?: string;
   country: string;
+  currency?: string; // e.g., 'EUR', 'XOF', 'USD'
   businessName?: string;
   industry?: string;
   // New fields from onboarding

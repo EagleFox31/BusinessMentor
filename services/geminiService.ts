@@ -39,10 +39,13 @@ const getClient = () => {
 export const initializeChat = async (user: UserProfile): Promise<string> => {
   const ai = getClient();
   
+  const currencySymbol = user.currency || 'EUR';
+
   const personalizedInstruction = `${MENTOR_SYSTEM_INSTRUCTION}
   \n\nContexte Utilisateur :
   - Nom : ${user.name}
   - Pays : ${user.country}
+  - Devise de travail : ${currencySymbol} (Tous les montants doivent être estimés dans cette devise)
   - Projet : ${user.businessName || 'Non défini'}
   - Stade : ${user.stage || 'Non défini'}
   - Type : ${user.businessType || 'Non défini'}
@@ -74,8 +77,6 @@ export const sendMessageToMentor = async (message: string): Promise<string> => {
       message: message
     });
     
-    // Check for grounding metadata (sources) to display if needed, 
-    // though typically included in text response by model automatically now.
     return result.text;
   } catch (error) {
     console.error("Gemini Error:", error);

@@ -3,9 +3,10 @@ import { PlanSection } from '../types';
 
 interface PlanViewProps {
   activeSection: PlanSection;
+  currency?: string;
 }
 
-const PlanView: React.FC<PlanViewProps> = ({ activeSection }) => {
+const PlanView: React.FC<PlanViewProps> = ({ activeSection, currency = '€' }) => {
   // Mock content for demonstration - in a real app this is populated by the AI
   const renderContent = () => {
     switch (activeSection) {
@@ -20,7 +21,7 @@ const PlanView: React.FC<PlanViewProps> = ({ activeSection }) => {
               <h3 className="text-lg font-semibold text-slate-100 mb-3">Hypothèses Fondamentales</h3>
               <ul className="list-disc list-inside space-y-2 text-slate-300">
                 <li>Le marché cible est prêt à payer pour une solution premium.</li>
-                <li>Le coût d'acquisition client (CAC) restera sous les 15€.</li>
+                <li>Le coût d'acquisition client (CAC) restera sous les 15{currency}.</li>
                 <li>La réglementation locale permet ce type de service sans licence bancaire.</li>
               </ul>
             </div>
@@ -36,11 +37,11 @@ const PlanView: React.FC<PlanViewProps> = ({ activeSection }) => {
                 </div>
                 <div className="glass-panel p-4 rounded-xl">
                     <h4 className="text-slate-400 text-xs uppercase tracking-wider mb-2">Segments Clients</h4>
-                    <p className="text-slate-200">Freelances, Designers, Consultants indépendants (CA 30k€ - 150k€).</p>
+                    <p className="text-slate-200">Freelances, Designers, Consultants indépendants (CA 30k{currency} - 150k{currency}).</p>
                 </div>
                 <div className="glass-panel p-4 rounded-xl">
                     <h4 className="text-slate-400 text-xs uppercase tracking-wider mb-2">Flux de Revenus</h4>
-                    <p className="text-slate-200">Abonnement SaaS (29€/mois) + Frais de transaction (1.5%).</p>
+                    <p className="text-slate-200">Abonnement SaaS (29{currency}/mois) + Frais de transaction (1.5%).</p>
                 </div>
                 <div className="glass-panel p-4 rounded-xl">
                     <h4 className="text-slate-400 text-xs uppercase tracking-wider mb-2">Structure de Coûts</h4>

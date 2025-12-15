@@ -1,18 +1,90 @@
 import React, { useState } from 'react';
 import { UserProfile, BusinessStage, BusinessType } from '../types';
-import { ArrowRight, Check, MapPin, Target, Briefcase, Lightbulb } from 'lucide-react';
+import { ArrowRight, Check, MapPin, Target, Briefcase, Lightbulb, ChevronLeft, Globe } from 'lucide-react';
 
 interface OnboardingWorkflowProps {
   initialData: Partial<UserProfile>;
   onComplete: (fullProfile: UserProfile) => void;
 }
 
+// Data Structure for Geography
+type CountryData = { name: string; currency: string };
+type RegionData = { [regionName: string]: CountryData[] };
+type GeographyData = { [continentName: string]: RegionData };
+
+const GEOGRAPHY: GeographyData = {
+  "Afrique": {
+    "Afrique de l'Ouest": [
+      { name: "Côte d'Ivoire", currency: "XOF" },
+      { name: "Sénégal", currency: "XOF" },
+      { name: "Bénin", currency: "XOF" },
+      { name: "Burkina Faso", currency: "XOF" },
+      { name: "Mali", currency: "XOF" },
+      { name: "Togo", currency: "XOF" },
+      { name: "Guinée", currency: "GNF" },
+      { name: "Nigéria", currency: "NGN" }
+    ],
+    "Afrique Centrale": [
+      { name: "Cameroun", currency: "XAF" },
+      { name: "Gabon", currency: "XAF" },
+      { name: "Congo (Brazzaville)", currency: "XAF" },
+      { name: "RDC", currency: "CDF" },
+      { name: "Tchad", currency: "XAF" }
+    ],
+    "Afrique du Nord": [
+      { name: "Maroc", currency: "MAD" },
+      { name: "Algérie", currency: "DZD" },
+      { name: "Tunisie", currency: "TND" },
+      { name: "Égypte", currency: "EGP" }
+    ],
+    "Afrique de l'Est": [
+        { name: "Kenya", currency: "KES" },
+        { name: "Rwanda", currency: "RWF" },
+        { name: "Tanzanie", currency: "TZS" },
+        { name: "Éthiopie", currency: "ETB" }
+    ],
+    "Afrique Australe": [
+        { name: "Afrique du Sud", currency: "ZAR" },
+        { name: "Madagascar", currency: "MGA" }
+    ]
+  },
+  "Europe": {
+    "Europe de l'Ouest": [
+      { name: "France", currency: "EUR" },
+      { name: "Belgique", currency: "EUR" },
+      { name: "Suisse", currency: "CHF" },
+      { name: "Luxembourg", currency: "EUR" }
+    ],
+    "Europe du Sud": [
+        { name: "Espagne", currency: "EUR" },
+        { name: "Italie", currency: "EUR" },
+        { name: "Portugal", currency: "EUR" }
+    ],
+    "Royaume-Uni & Irlande": [
+        { name: "Royaume-Uni", currency: "GBP" },
+        { name: "Irlande", currency: "EUR" }
+    ]
+  },
+  "Amérique du Nord": {
+    "Amérique du Nord": [
+      { name: "Canada", currency: "CAD" },
+      { name: "États-Unis", currency: "USD" }
+    ]
+  }
+};
+
 const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, onComplete }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<UserProfile>>({
     ...initialData,
-    country: initialData.country || 'France',
+    country: initialData.country || '',
+    currency: initialData.currency || 'EUR'
   });
+
+  // Location Selector State
+  const [locStep, setLocStep] = useState<'continent' | 'region' | 'country'>('continent');
+  const [selectedContinent, setSelectedContinent] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
   const updateField = (field: keyof UserProfile, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -26,48 +98,123 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
     }
   };
 
-  const renderStep1_Location = () => (
-    <div className="space-y-6 animate-fade-in-up">
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
-            <MapPin className="w-8 h-8 text-emerald-500" />
+  // --- Step 1: Hierarchical Location Selection ---
+  const renderStep1_Location = () => {
+    const handleContinentSelect = (continent: string) => {
+        setSelectedContinent(continent);
+        setLocStep('region');
+    };
+
+    const handleRegionSelect = (region: string) => {
+        setSelectedRegion(region);
+        setLocStep('country');
+    };
+
+    const handleCountrySelect = (country: CountryData) => {
+        updateField('country', country.name);
+        updateField('currency', country.currency);
+        nextStep();
+    };
+
+    const backToContinent = () => {
+        setSelectedContinent(null);
+        setLocStep('continent');
+    }
+
+    const backToRegion = () => {
+        setSelectedRegion(null);
+        setLocStep('region');
+    }
+
+    return (
+        <div className="space-y-6 animate-fade-in-up">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                <MapPin className="w-8 h-8 text-emerald-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Juridiction & Devise</h2>
+            <p className="text-slate-400 mt-2">
+                {locStep === 'continent' && "Sélectionnez votre continent."}
+                {locStep === 'region' && `Zone en ${selectedContinent}.`}
+                {locStep === 'country' && `Pays en ${selectedRegion}.`}
+            </p>
+          </div>
+
+          <div className="min-h-[300px]">
+            {/* CONTINENTS */}
+            {locStep === 'continent' && (
+                <div className="grid grid-cols-1 gap-3">
+                    {Object.keys(GEOGRAPHY).map(continent => (
+                        <button
+                            key={continent}
+                            onClick={() => handleContinentSelect(continent)}
+                            className="p-4 rounded-xl border border-slate-700 bg-slate-800/50 hover:bg-slate-800 hover:border-emerald-500/50 text-left transition-all flex justify-between items-center group"
+                        >
+                            <span className="font-medium text-slate-200">{continent}</span>
+                            <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* REGIONS */}
+            {locStep === 'region' && selectedContinent && (
+                <div className="space-y-4">
+                    <button onClick={backToContinent} className="flex items-center text-xs text-slate-500 hover:text-white mb-2">
+                        <ChevronLeft className="w-3 h-3 mr-1" /> Retour aux continents
+                    </button>
+                    <div className="grid grid-cols-1 gap-3">
+                        {Object.keys(GEOGRAPHY[selectedContinent]).map(region => (
+                            <button
+                                key={region}
+                                onClick={() => handleRegionSelect(region)}
+                                className="p-4 rounded-xl border border-slate-700 bg-slate-800/50 hover:bg-slate-800 hover:border-blue-500/50 text-left transition-all flex justify-between items-center group"
+                            >
+                                <span className="font-medium text-slate-200">{region}</span>
+                                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-blue-400" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* COUNTRIES */}
+            {locStep === 'country' && selectedContinent && selectedRegion && (
+                <div className="space-y-4">
+                     <button onClick={backToRegion} className="flex items-center text-xs text-slate-500 hover:text-white mb-2">
+                        <ChevronLeft className="w-3 h-3 mr-1" /> Retour aux zones ({selectedContinent})
+                    </button>
+                    <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                        {GEOGRAPHY[selectedContinent][selectedRegion].map(country => (
+                            <button
+                                key={country.name}
+                                onClick={() => handleCountrySelect(country)}
+                                className="p-3 rounded-xl border border-slate-700 bg-slate-800/30 hover:bg-emerald-950/30 hover:border-emerald-500 text-left transition-all group"
+                            >
+                                <div className="font-medium text-slate-200 text-sm">{country.name}</div>
+                                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                    <Globe className="w-3 h-3" /> {country.currency}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+          </div>
+          
+          <div className="pt-4 border-t border-slate-800">
+             <label className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-2 block">Nom du Projet (Optionnel)</label>
+             <input 
+                type="text" 
+                value={formData.businessName || ''}
+                onChange={(e) => updateField('businessName', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-emerald-500 outline-none placeholder-slate-600"
+                placeholder="Ex: MyStartup"
+             />
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-white">Zone d'Opération</h2>
-        <p className="text-slate-400 mt-2">Pour adapter la fiscalité, le droit et le marché.</p>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        {['France', 'Canada', 'Suisse', 'Belgique', 'Maroc', 'Sénégal', 'Côte d\'Ivoire', 'USA'].map(country => (
-          <button
-            key={country}
-            onClick={() => { updateField('country', country); nextStep(); }}
-            className={`p-4 rounded-xl border text-left transition-all ${
-              formData.country === country 
-                ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
-                : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-slate-500 hover:bg-slate-800'
-            }`}
-          >
-            <div className="font-medium">{country}</div>
-          </button>
-        ))}
-      </div>
-      
-      <div className="pt-4">
-         <label className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-2 block">Nom du Projet (Optionnel)</label>
-         <input 
-            type="text" 
-            value={formData.businessName || ''}
-            onChange={(e) => updateField('businessName', e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-emerald-500 outline-none"
-            placeholder="Ex: MyStartup"
-         />
-      </div>
-      
-      <button onClick={nextStep} className="w-full mt-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
-        Suivant
-      </button>
-    </div>
-  );
+    );
+  };
 
   const renderStep2_Stage = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -169,9 +316,9 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
                 ))}
             </div>
 
-            <div className="glass-panel p-8 rounded-3xl border border-white/5 shadow-2xl relative">
-                <div className="absolute top-4 right-4 opacity-50">
-                    <span className="font-['Pinyon_Script'] text-xl text-emerald-500">Trigenys</span>
+            <div className="glass-panel p-8 rounded-3xl border border-white/5 shadow-2xl relative min-h-[500px]">
+                <div className="absolute top-4 right-4 opacity-50 flex items-center gap-1">
+                   <span className="font-['Pinyon_Script'] text-xl text-emerald-500">Trigenys</span>
                 </div>
 
                 {step === 1 && renderStep1_Location()}

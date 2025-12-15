@@ -48,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       setIsLoading(true);
       try {
         await initializeChat(user);
-        const welcomeMsg = `Bonjour ${user.name}. \n\nNous structurons un projet **${user.businessType}** en **${user.country}**, actuellement au stade **${user.stage}**.\n\nJe suis prêt. Quel est le premier point de tension ou l'objectif du jour ?`;
+        const welcomeMsg = `Bonjour ${user.name}. \n\nNous structurons un projet **${user.businessType}** en **${user.country}**, devise **${user.currency}**. \n\nJe suis prêt. Quel est le premier point de tension ou l'objectif du jour ?`;
         setMessages([
           {
             id: 'init-1',
@@ -108,7 +108,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     const roadmapSteps = [
       { id: 1, title: "Fondations & Idée", desc: "Validation du problème et de la solution.", icon: Compass, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" },
       { id: 2, title: "Marché & Cible", desc: "Analyse concurrentielle et personas.", icon: Target, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
-      { id: 3, title: "Business Model", desc: "Mécanique de revenus et coûts.", icon: Briefcase, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
+      { id: 3, title: "Business Model", desc: `Mécanique de revenus en ${user.currency || 'devise locale'}.`, icon: Briefcase, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
       { id: 4, title: "Structure Légale", desc: user.country === 'France' ? "Statuts (SAS/SARL), Kbis, Pacte." : "Incorporation et conformité locale.", icon: Shield, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20" },
       { id: 5, title: "Finance & ROI", desc: "Trésorerie prévisionnelle et besoin en fond.", icon: Coins, color: "text-rose-400", bg: "bg-rose-400/10", border: "border-rose-400/20" },
       { id: 6, title: "Expansion", desc: "Marketing, Sales et Recrutement.", icon: TrendingUp, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" },
@@ -128,7 +128,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
              </div>
              <div className="px-4 py-2 bg-slate-800 rounded-lg border border-slate-700">
                 <span className="block text-xs text-slate-500 uppercase">Juridiction</span>
-                <span className="font-semibold text-slate-200">{user.country}</span>
+                <span className="font-semibold text-slate-200">{user.country} <span className="text-slate-500">({user.currency})</span></span>
              </div>
           </div>
         </div>
@@ -323,7 +323,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         <p className="text-slate-400 text-sm">Consolidation de votre stratégie en documents exploitables.</p>
                     </div>
                  </div>
-                 <PlanView activeSection={activePlanSection} />
+                 <PlanView activeSection={activePlanSection} currency={user.currency} />
                </div>
             </div>
           )}
@@ -339,29 +339,69 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         </div>
         
         {/* Hidden Print Area */}
-        <div className="hidden print-only fixed inset-0 bg-white text-black z-[100] p-10 overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Dossier Stratégique - {user.businessName || 'Projet'}</h1>
+        <div className="hidden print-only fixed inset-0 bg-white text-black z-[100] p-12 overflow-y-auto">
+            {/* Styled Header for Print */}
+            <div className="flex justify-between items-start mb-10 border-b pb-6">
+                <div>
+                    <h1 className="text-4xl font-bold mb-2">Dossier Stratégique</h1>
+                    <h2 className="text-xl text-gray-600">{user.businessName || 'Projet Entrepreneurial'}</h2>
+                </div>
                 <div className="text-right">
-                    <p className="text-sm font-bold">BusinessMentor</p>
-                    <p className="text-xs italic">by Trigenys Group</p>
+                    <div className="flex flex-col items-end">
+                       <span className="font-bold text-lg text-slate-800 tracking-tight">BusinessMentor</span>
+                       <div className="flex items-center gap-1.5 mt-0.5">
+                         <span className="font-['Pinyon_Script'] text-2xl text-emerald-600 italic">by</span>
+                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500">TRIGENYS GROUP</span>
+                       </div>
+                    </div>
                 </div>
             </div>
             
-            <p className="mb-8 text-gray-600">Généré pour {user.name} ({user.country}) le {new Date().toLocaleDateString()}</p>
-            <hr className="my-4"/>
-            <h2 className="text-xl font-bold mt-6 mb-2">Contexte du Projet</h2>
-            <p><strong>Stade :</strong> {user.stage}</p>
-            <p><strong>Type :</strong> {user.businessType}</p>
-            <p><strong>Objectif :</strong> {user.mainGoal}</p>
+            <div className="mb-8 p-4 bg-gray-50 border rounded-lg flex justify-between">
+               <div>
+                  <span className="block text-xs font-bold text-gray-400 uppercase">Entrepreneur</span>
+                  <span className="font-medium">{user.name}</span>
+               </div>
+               <div>
+                  <span className="block text-xs font-bold text-gray-400 uppercase">Juridiction</span>
+                  <span className="font-medium">{user.country}</span>
+               </div>
+               <div>
+                  <span className="block text-xs font-bold text-gray-400 uppercase">Devise de compte</span>
+                  <span className="font-medium">{user.currency || 'EUR'}</span>
+               </div>
+               <div>
+                  <span className="block text-xs font-bold text-gray-400 uppercase">Date</span>
+                  <span className="font-medium">{new Date().toLocaleDateString()}</span>
+               </div>
+            </div>
 
-            <h2 className="text-xl font-bold mt-6 mb-2">Synthèse des Échanges</h2>
-            <div className="space-y-4">
-                {messages.filter(m => m.role === 'model').map(m => (
-                    <div key={m.id} className="mb-4 p-4 border rounded bg-gray-50">
-                        <p className="whitespace-pre-wrap">{m.text}</p>
-                    </div>
-                ))}
+            <h3 className="text-2xl font-bold mt-8 mb-4 border-l-4 border-emerald-500 pl-4">Synthèse & Analyse</h3>
+            <p className="mb-4 text-gray-600 italic">
+               Ce document est généré automatiquement par BusinessMentor, l'intelligence stratégique de Trigenys Group. 
+               Il synthétise les axes de travail définis lors de la session.
+            </p>
+
+            {/* Print Content from Plan View if user was there, or Chat logs */}
+            {activeTab === 'studio' ? (
+                <div className="mt-4">
+                   <h4 className="text-lg font-bold uppercase tracking-wider text-gray-500 mb-2">{activePlanSection}</h4>
+                   <PlanView activeSection={activePlanSection} currency={user.currency} />
+                </div>
+            ) : (
+                <div className="space-y-4">
+                   {messages.filter(m => m.role === 'model').map(m => (
+                       <div key={m.id} className="mb-6">
+                           <div className="text-xs text-gray-400 font-bold mb-1">MENTOR</div>
+                           <p className="whitespace-pre-wrap text-justify leading-relaxed text-gray-800">{m.text}</p>
+                       </div>
+                   ))}
+                </div>
+            )}
+            
+            <div className="mt-20 pt-8 border-t text-center text-xs text-gray-400">
+               <p>Document confidentiel généré via BusinessMentor by Trigenys Group.</p>
+               <p>L'expertise stratégique au service de l'ambition.</p>
             </div>
         </div>
       </main>
