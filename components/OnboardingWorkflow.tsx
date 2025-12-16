@@ -119,12 +119,12 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
     const backToContinent = () => {
         setSelectedContinent(null);
         setLocStep('continent');
-    }
+    };
 
     const backToRegion = () => {
         setSelectedRegion(null);
         setLocStep('region');
-    }
+    };
 
     return (
         <div className="space-y-6 animate-fade-in-up">
