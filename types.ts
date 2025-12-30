@@ -1,11 +1,11 @@
+
 export interface UserProfile {
   name: string;
   email?: string;
   country: string;
-  currency?: string; // e.g., 'EUR', 'XOF', 'USD'
+  currency?: string;
   businessName?: string;
   industry?: string;
-  // New fields from onboarding
   stage?: BusinessStage;
   businessType?: BusinessType;
   mainGoal?: string;
@@ -31,24 +31,28 @@ export interface ChatMessage {
   role: 'user' | 'model' | 'system';
   text: string;
   timestamp: Date;
-  isThinking?: boolean;
 }
 
 export enum PlanSection {
-  IDEA_VALIDATION = 'Validation',
-  MARKET_STUDY = 'Étude de Marché',
+  IDEA_VALIDATION = 'Fondations & Idée',
+  MARKET_STUDY = 'Marché & Cible',
   BUSINESS_MODEL = 'Business Model',
-  FINANCIALS = 'Stratégie Financière',
   LEGAL = 'Structure Légale',
-  OPERATIONS = 'Système & Pilotage',
-  MARKETING = 'Marketing & Acquisition',
-  GROWTH = 'Croissance & Expansion'
+  FINANCIALS = 'Finance & ROI',
+  GROWTH = 'Marketing & Expansion'
 }
+
+export interface SectionProgress {
+  content: string;
+  completion: number; // 0 to 100
+}
+
+export type PlanData = Record<PlanSection, SectionProgress>;
 
 export interface SimulationDataPoint {
   month: number;
   revenue: number;
   expenses: number;
-  stress: number; // 0-100
-  stability: number; // 0-100
+  stress: number;
+  stability: number;
 }
