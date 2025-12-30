@@ -10,15 +10,14 @@ import {
   Target, 
   TrendingUp, 
   Globe, 
-  ArrowRight, 
   Shield, 
-  Zap, 
   Eye 
 } from 'lucide-react';
 import { UserProfile, ChatMessage, PlanSection, PlanData } from '../types';
 import ChatInterface from './ChatInterface';
 import SimulationCharts from './SimulationCharts';
 import PlanView from './PlanView';
+import { ApexLogo } from './Logo';
 import { initializeChat, sendMessageToMentor, distillPlanFromHistory } from '../services/geminiService';
 
 interface DashboardProps {
@@ -44,7 +43,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         setMessages([{
           id: 'init',
           role: 'model',
-          text: `Opérateur **${user.name}**, le Faucon a verrouillé les coordonnées sur **${user.country}**. \n\nSystèmes **Trigenys v4.0** en ligne. Prêt pour l'acquisition d'objectifs stratégiques.`,
+          text: `Opérateur **${user.name}**, l'oeil d'**Horus** a verrouillé les coordonnées sur **${user.country}**. \n\nSystèmes **Trigenys v4.0** en ligne. Prêt pour l'acquisition d'objectifs stratégiques.`,
           timestamp: new Date()
         }]);
       } catch (e) { console.error(e); } finally { setIsLoading(false); }
@@ -86,7 +85,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const roadmapSteps = [
     { section: PlanSection.IDEA_VALIDATION, icon: Eye, color: "text-sky-400", desc: "Clarté du concept tactique." },
     { section: PlanSection.MARKET_STUDY, icon: Globe, color: "text-cyan-400", desc: "Scan du périmètre concurrentiel." },
-    { section: PlanSection.BUSINESS_MODEL, icon: Zap, color: "text-blue-400", desc: "Moteur de capture de valeur." },
+    { section: PlanSection.BUSINESS_MODEL, icon: Target, color: "text-blue-400", desc: "Moteur de capture de valeur." },
     { section: PlanSection.LEGAL, icon: Shield, color: "text-slate-400", desc: "Blindage juridique." },
     { section: PlanSection.FINANCIALS, icon: TrendingUp, color: "text-emerald-400", desc: "Vitesse ascensionnelle." },
     { section: PlanSection.GROWTH, icon: Target, color: "text-rose-400", desc: "Cible d'impact marketing." },
@@ -98,10 +97,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       {/* Sidebar Stylisée Trigenys (Cyber Blue) */}
       <aside className="w-28 lg:w-80 bg-slate-950/60 backdrop-blur-xl border-r border-sky-900/30 flex flex-col py-10 px-6">
         <div className="mb-16 flex flex-col items-center lg:items-start lg:pl-4">
-           <Zap className="text-sky-400 w-12 h-12 fill-current apex-glow mb-4" />
+           <ApexLogo className="w-12 h-12 mb-4" />
            <div className="hidden lg:flex flex-col">
-              <span className="font-display font-bold text-2xl tracking-tighter text-white uppercase">APEX VISION</span>
-              <div className="trigenys-signature text-[8px] mt-1 text-sky-500/60">by Trigenys Group</div>
+              <span className="font-display font-bold text-2xl tracking-tighter text-white uppercase">APEX HORUS</span>
+              <div className="trigenys-signature text-[8px] mt-1 text-sky-500/60 flex items-center gap-2">
+                <span className="font-signature text-2xl text-sky-400/80 italic lowercase tracking-normal -mt-1">by</span>
+                Trigenys Group
+              </div>
            </div>
         </div>
         
@@ -143,7 +145,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           <div className="p-12 h-full overflow-y-auto space-y-16 animate-fadeIn">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                <div className="space-y-4">
-                  <div className="trigenys-signature text-sky-500/40">HUD VERSION 4.2.1 // GLOBAL INFRASTRUCTURE</div>
+                  <div className="trigenys-signature text-sky-500/40 flex items-center gap-2">
+                    HUD VERSION 4.2.1 // 
+                    <span className="font-signature text-xl text-sky-500/60 italic lowercase tracking-normal">by</span>
+                    GLOBAL INFRASTRUCTURE
+                  </div>
                   <h1 className="text-6xl font-display font-bold text-white tracking-tighter">
                     Mission <span className="text-gradient-stealth italic font-signature lowercase text-7xl">Control</span>
                   </h1>
@@ -196,7 +202,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                       <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse apex-glow"></div>
                       <h2 className="text-xl font-display font-bold uppercase tracking-widest text-white italic">Signal: <span className="text-sky-400">{activePlanSection}</span></h2>
                    </div>
-                   <div className="trigenys-signature text-[7px] mt-1 opacity-50">Secure Communication Link</div>
+                   <div className="trigenys-signature text-[7px] mt-1 opacity-50 flex items-center gap-1">
+                     <span className="font-signature text-xl text-sky-400/80 italic lowercase tracking-normal">by</span>
+                     Secure Communication Link
+                   </div>
                 </div>
                 {isSyncing && <div className="text-[9px] font-black text-sky-400 animate-pulse tracking-[0.4em] uppercase">Encrypting Blueprint...</div>}
              </div>
@@ -204,7 +213,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
            </div>
         )}
         
-        {activeTab === 'studio' && <div className="p-16 h-full overflow-y-auto max-w-6xl mx-auto"><PlanView activeSection={activePlanSection} planData={planData as any} /></div>}
+        {activeTab === 'studio' && <div className="p-16 h-full overflow-y-auto max-w-6xl mx-auto"><PlanView activeSection={activePlanSection} planData={planData as any} userName={user.name} /></div>}
         {activeTab === 'simulation' && <div className="p-16 h-full overflow-y-auto"><SimulationCharts user={user} /></div>}
       </main>
     </div>

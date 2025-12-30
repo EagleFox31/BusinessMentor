@@ -1,5 +1,5 @@
 {
-  "name": "apexvision",
+  "name": "apexhorus",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,7 +14,8 @@
     "lucide-react": "^0.561.0",
     "recharts": "^3.5.1",
     "react-markdown": "^10.1.0",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "jspdf": "^2.5.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

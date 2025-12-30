@@ -132,7 +132,7 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
                 <MapPin className="w-10 h-10 text-apex-400" />
             </div>
             <h2 className="text-3xl font-display font-bold text-white tracking-tight">Zone d'Opération</h2>
-            <p className="text-slate-500 mt-2 font-medium">Calibrage géo-stratégique by Trigenys Group.</p>
+            <p className="text-slate-500 mt-2 font-medium">Calibrage géo-stratégique.</p>
           </div>
 
           <div className="min-h-[300px]">
@@ -187,7 +187,7 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
                 value={formData.businessName || ''}
                 onChange={(e) => updateField('businessName', e.target.value)}
                 className="w-full bg-slate-900/40 border border-white/10 rounded-2xl p-4 text-white focus:border-apex-400 outline-none placeholder-slate-800 font-bold backdrop-blur-sm"
-                placeholder="Ex: Projet Apex"
+                placeholder="Ex: Projet Horus"
              />
           </div>
         </div>
@@ -201,7 +201,7 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
             <Lightbulb className="w-10 h-10 text-apex-400" />
         </div>
         <h2 className="text-3xl font-display font-bold text-white tracking-tight">Altitude Actuelle</h2>
-        <p className="text-slate-500 mt-2 font-medium">Mesure de maturité by Trigenys Group.</p>
+        <p className="text-slate-500 mt-2 font-medium">Mesure de maturité stratégique.</p>
       </div>
 
       <div className="space-y-4">
@@ -230,7 +230,7 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
             <Briefcase className="w-10 h-10 text-apex-400" />
         </div>
         <h2 className="text-3xl font-display font-bold text-white tracking-tight">Architecture</h2>
-        <p className="text-slate-500 mt-2 font-medium">Classification structurelle Trigenys.</p>
+        <p className="text-slate-500 mt-2 font-medium">Classification structurelle.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -280,7 +280,7 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
 
   return (
     <div className="min-h-screen bg-transparent flex items-center justify-center p-6 relative overflow-hidden font-sans">
-        <div className="w-full max-w-xl z-10">
+        <div className="w-full max-xl z-10">
             {/* Progress Visualization */}
             <div className="flex items-center justify-between mb-16 px-4">
                 {[1, 2, 3, 4].map(i => (
@@ -296,9 +296,12 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
                 <div className="absolute top-8 right-10 flex flex-col items-end opacity-40">
                    <div className="flex items-center gap-2">
                      <div className="w-1.5 h-1.5 bg-apex-400 rounded-full"></div>
-                     <span className="font-signature text-xl text-white">Apex Vision</span>
+                     <span className="font-signature text-xl text-white">Apex Horus</span>
                    </div>
-                   <span className="text-[7px] font-black text-apex-400 uppercase tracking-widest -mt-1">by Trigenys Group</span>
+                   <div className="trigenys-signature text-[7px] -mt-1 flex items-center gap-1">
+                     <span className="font-signature text-xl text-sky-400/80 italic lowercase tracking-normal">by</span>
+                     Trigenys Group
+                   </div>
                 </div>
 
                 {step === 1 && renderStep1_Location()}
@@ -308,7 +311,10 @@ const OnboardingWorkflow: React.FC<OnboardingWorkflowProps> = ({ initialData, on
             </div>
             
             <div className="mt-8 text-center">
-               <span className="text-[10px] font-black text-slate-700 uppercase tracking-[0.4em]">by Trigenys Group Global Infrastructure</span>
+               <div className="trigenys-signature text-[10px] text-slate-700/60 justify-center">
+                 <span className="font-signature text-2xl text-sky-400/40 italic lowercase tracking-normal">by</span>
+                 Trigenys Group Global Infrastructure
+               </div>
             </div>
         </div>
     </div>

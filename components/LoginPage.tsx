@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { PlayCircle, Zap, ArrowRight, Shield } from 'lucide-react';
+import { PlayCircle, ArrowRight, Shield } from 'lucide-react';
 import { UserProfile } from '../types';
+import { ApexLogo } from './Logo';
 
 interface LoginPageProps {
   onLogin: (partialUser: Partial<UserProfile>) => void;
@@ -44,24 +45,27 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <div className="relative z-10 max-w-lg">
           <div className="mb-14 flex flex-col">
             <div className="flex items-center gap-4">
-               <Zap className="text-apex-400 w-10 h-10 fill-current gold-glow" />
-               <span className="font-display font-bold text-4xl tracking-tighter text-white uppercase">Apex Vision</span>
+               <ApexLogo className="w-12 h-12" />
+               <span className="font-display font-bold text-4xl tracking-tighter text-white uppercase">Apex Horus</span>
             </div>
-            <div className="trigenys-signature mt-2 text-xs">by Trigenys Group</div>
+            <div className="trigenys-signature mt-2 text-xs flex items-center gap-2">
+              <span className="font-signature text-2xl text-sky-400/80 italic lowercase tracking-normal">by</span>
+              Trigenys Group
+            </div>
           </div>
           <h2 className="text-7xl font-display font-bold mb-10 text-white leading-[0.85] tracking-tighter">
             Votre Vision, <br/>
-            <span className="text-gradient-gold font-signature normal-case text-8xl">notre structure.</span>
+            <span className="text-gradient-stealth font-signature normal-case text-8xl">notre structure.</span>
           </h2>
           <p className="text-xl text-slate-500 mb-14 leading-relaxed font-light">
-            Entrez dans le cockpit de <strong>Trigenys Group</strong>. L'analyse prédictive commence dès votre identification.
+            Entrez dans le cockpit de <strong>Trigenys Group</strong>. L'oeil d'<strong>Horus</strong> analyse votre projet dès votre identification.
           </p>
           <div className="p-8 glass-apex rounded-[2.5rem] flex items-center gap-6">
-             <div className="w-16 h-16 bg-apex-400 rounded-2xl flex items-center justify-center">
-                <Shield className="text-abyss w-8 h-8" />
+             <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center">
+                <Shield className="text-sky-400 w-8 h-8" />
              </div>
              <div>
-                <span className="block font-black text-white text-xs uppercase tracking-widest">Protocoles Apex v3</span>
+                <span className="block font-black text-white text-xs uppercase tracking-widest">Protocoles Apex v4</span>
                 <span className="text-slate-500 font-medium">Infrastructure Sécurisée Trigenys</span>
              </div>
           </div>
@@ -74,8 +78,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           
           <div className="space-y-6">
              <div className="lg:hidden flex flex-col items-center mb-10">
-                <Zap className="text-apex-400 w-12 h-12 mb-4 gold-glow" />
-                <div className="trigenys-signature">by Trigenys Group</div>
+                <ApexLogo className="w-16 h-16 mb-4" />
+                <div className="trigenys-signature flex items-center gap-2">
+                  <span className="font-signature text-2xl text-sky-400/80 italic lowercase tracking-normal">by</span>
+                  Trigenys Group
+                </div>
              </div>
             <h1 className="text-5xl font-display font-bold text-white tracking-tight">Authentification</h1>
             <p className="text-slate-500 font-medium text-lg">Initialisation de la session pilote.</p>
