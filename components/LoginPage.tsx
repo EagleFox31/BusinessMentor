@@ -1,36 +1,52 @@
 
 import React, { useState } from 'react';
-import { PlayCircle, ArrowRight, Shield } from 'lucide-react';
-import { UserProfile } from '../types';
+import { PlayCircle, ArrowRight, Shield, Loader2, Mail, Lock } from 'lucide-react';
+import { auth } from '../services/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
 import { ApexLogo } from './Logo';
 
 interface LoginPageProps {
-  onLogin: (partialUser: Partial<UserProfile>) => void;
+  onLogin: (partialUser: any) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-  const [name, setName] = useState('');
-  
-  const handleDemoLogin = () => {
-    onLogin({
-      name: 'Entrepreneur Apex',
-      country: 'France',
-    });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    try {
+      if (isRegistering) {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+    } catch (err: any) {
+      setError("Erreur d'authentification. Vérifiez vos accès.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name) {
-      onLogin({
-        name,
-        country: 'France'
-      });
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    try {
+      await signInAnonymously(auth);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col lg:flex-row font-sans text-slate-200">
-      
       {/* Left Panel - Visual Power */}
       <div className="hidden lg:flex w-1/2 bg-transparent relative overflow-hidden items-center justify-center p-24 border-r border-white/5">
         <div className="absolute inset-0 opacity-20 grayscale hover:grayscale-0 transition-all duration-1000">
@@ -58,14 +74,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <span className="text-gradient-stealth font-signature normal-case text-8xl">notre structure.</span>
           </h2>
           <p className="text-xl text-slate-500 mb-14 leading-relaxed font-light">
-            Entrez dans le cockpit de <strong>Trigenys Group</strong>. L'oeil d'<strong>Horus</strong> analyse votre projet dès votre identification.
+            Entrez dans le cockpit de <strong className="text-white">Trigenys Group</strong>. L'oeil d'<strong className="text-white">Horus</strong> analyse votre projet via Firebase Secure.
           </p>
           <div className="p-8 glass-apex rounded-[2.5rem] flex items-center gap-6">
              <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center">
                 <Shield className="text-sky-400 w-8 h-8" />
              </div>
              <div>
-                <span className="block font-black text-white text-xs uppercase tracking-widest">Protocoles Apex v4</span>
+                <span className="block font-black text-white text-xs uppercase tracking-widest">Protocoles Cloud v11</span>
                 <span className="text-slate-500 font-medium">Infrastructure Sécurisée Trigenys</span>
              </div>
           </div>
@@ -74,7 +90,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
       {/* Right Panel - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-12 sm:p-32 bg-transparent">
-        <div className="w-full max-w-md space-y-16">
+        <div className="w-full max-w-md space-y-12">
           
           <div className="space-y-6">
              <div className="lg:hidden flex flex-col items-center mb-10">
@@ -85,27 +101,56 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 </div>
              </div>
             <h1 className="text-5xl font-display font-bold text-white tracking-tight">Authentification</h1>
-            <p className="text-slate-500 font-medium text-lg">Initialisation de la session pilote.</p>
+            <p className="text-slate-500 font-medium text-lg">
+              {isRegistering ? "Créez votre identifiant pilote." : "Initialisation de la session pilote."}
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-10">
+          <form onSubmit={handleAuth} className="space-y-6">
             <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] block ml-2">Code d'Identité Entrepreneur</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-slate-900/40 border border-white/10 rounded-3xl px-8 py-6 text-white placeholder-slate-800 focus:outline-none focus:border-apex-400/50 focus:ring-1 focus:ring-apex-400/50 transition-all text-xl font-bold backdrop-blur-sm"
-                placeholder="Votre Nom / Alias"
-              />
+              <div className="relative group">
+                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 group-focus-within:text-sky-400 transition-colors" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-slate-900/40 border border-white/10 rounded-3xl pl-16 pr-8 py-6 text-white placeholder-slate-700 focus:outline-none focus:border-apex-400/50 transition-all text-lg font-bold backdrop-blur-sm"
+                  placeholder="Email Stratégique"
+                />
+              </div>
+              
+              <div className="relative group">
+                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 group-focus-within:text-sky-400 transition-colors" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-slate-900/40 border border-white/10 rounded-3xl pl-16 pr-8 py-6 text-white placeholder-slate-700 focus:outline-none focus:border-apex-400/50 transition-all text-lg font-bold backdrop-blur-sm"
+                  placeholder="Clé d'Accès"
+                />
+              </div>
             </div>
+
+            {error && <p className="text-red-400 text-sm font-bold ml-2 px-4 py-2 bg-red-400/10 border border-red-400/20 rounded-xl">{error}</p>}
 
             <button
               type="submit"
-              className="w-full bg-apex-400 text-abyss font-black py-6 rounded-3xl transition-all transform hover:scale-[1.02] shadow-2xl shadow-apex-500/30 flex items-center justify-center gap-4 text-xl uppercase tracking-widest"
+              disabled={isLoading}
+              className="w-full bg-apex-400 text-abyss font-black py-6 rounded-3xl transition-all transform hover:scale-[1.02] shadow-2xl shadow-apex-500/30 flex items-center justify-center gap-4 text-xl uppercase tracking-widest disabled:opacity-50"
             >
-              DÉCOLLAGE IMMÉDIAT <ArrowRight className="w-6 h-6" />
+              {isLoading ? <Loader2 className="w-8 h-8 animate-spin" /> : (
+                <> {isRegistering ? "CRÉER L'ACCÈS" : "DÉCOLLAGE"} <ArrowRight className="w-6 h-6" /></>
+              )}
+            </button>
+            
+            <button 
+              type="button"
+              onClick={() => setIsRegistering(!isRegistering)}
+              className="w-full text-center text-slate-600 font-bold hover:text-sky-400 transition-colors text-sm uppercase tracking-widest"
+            >
+              {isRegistering ? "J'ai déjà un compte Apex" : "Nouvel Agent ? S'enregistrer"}
             </button>
           </form>
 
@@ -114,19 +159,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               <div className="w-full border-t border-white/5"></div>
             </div>
             <div className="relative flex justify-center text-[10px] font-black uppercase tracking-[0.3em]">
-              <span className="px-6 bg-transparent text-slate-700">Canaux Sécurisés Trigenys</span>
+              <span className="px-6 bg-[#020617] text-slate-700">Canaux Sécurisés Cloud</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            <button
-              onClick={handleDemoLogin}
-              className="w-full glass-apex text-slate-300 font-bold py-5 rounded-2xl flex items-center justify-center gap-4 hover:text-apex-400 transition-all border border-white/10"
-            >
-              <PlayCircle className="w-6 h-6" />
-              Initialiser Mode Simulation
-            </button>
-          </div>
+          <button
+            onClick={handleDemoLogin}
+            disabled={isLoading}
+            className="w-full glass-apex text-slate-300 font-bold py-5 rounded-2xl flex items-center justify-center gap-4 hover:text-apex-400 transition-all border border-white/10"
+          >
+            <PlayCircle className="w-6 h-6" />
+            Accès Invité (Mode Alpha)
+          </button>
 
         </div>
       </div>

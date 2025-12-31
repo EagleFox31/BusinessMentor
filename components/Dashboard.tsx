@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -11,7 +10,8 @@ import {
   TrendingUp, 
   Globe, 
   Shield, 
-  Eye 
+  Eye,
+  RefreshCw
 } from 'lucide-react';
 import { UserProfile, ChatMessage, PlanSection, PlanData } from '../types';
 import ChatInterface from './ChatInterface';
@@ -19,6 +19,8 @@ import SimulationCharts from './SimulationCharts';
 import PlanView from './PlanView';
 import { ApexLogo } from './Logo';
 import { initializeChat, sendMessageToMentor, distillPlanFromHistory } from '../services/geminiService';
+import { auth, db } from '../services/firebase';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 interface DashboardProps {
   user: UserProfile;
@@ -35,21 +37,65 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [activePlanSection, setActivePlanSection] = useState<PlanSection>(PlanSection.IDEA_VALIDATION);
   const [planData, setPlanData] = useState<Partial<PlanData>>({});
 
+  // Charger les données depuis Firestore au montage
+  useEffect(() => {
+    const loadSavedData = async () => {
+      if (!auth.currentUser) return;
+      const docRef = doc(db, "users", auth.currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.history) {
+          // Reconvertir les timestamps Firebase en objets Date
+          const history = data.history.map((m: any) => ({
+            ...m,
+            timestamp: m.timestamp.toDate ? m.timestamp.toDate() : new Date(m.timestamp)
+          }));
+          setMessages(history);
+        }
+        if (data.plan) setPlanData(data.plan);
+      }
+    };
+    loadSavedData();
+  }, []);
+
+  // Initialiser le chat si l'historique est vide
   useEffect(() => {
     const startSession = async () => {
+      if (messages.length > 0) return;
       setIsLoading(true);
       try {
-        await initializeChat(user);
-        setMessages([{
+        const welcomeMessage = await initializeChat(user);
+        const initMsg: ChatMessage = {
           id: 'init',
           role: 'model',
-          text: `Opérateur **${user.name}**, l'oeil d'**Horus** a verrouillé les coordonnées sur **${user.country}**. \n\nSystèmes **Trigenys v4.0** en ligne. Prêt pour l'acquisition d'objectifs stratégiques.`,
+          text: welcomeMessage,
           timestamp: new Date()
-        }]);
-      } catch (e) { console.error(e); } finally { setIsLoading(false); }
+        };
+        setMessages([initMsg]);
+        saveToFirestore([initMsg], planData);
+      } catch (e) { 
+        console.error(e); 
+      } finally { 
+        setIsLoading(false); 
+      }
     };
     startSession();
-  }, [user]);
+  }, [user, messages.length]);
+
+  const saveToFirestore = async (history: ChatMessage[], plan: Partial<PlanData>) => {
+    if (!auth.currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        history: history,
+        plan: plan,
+        lastUpdated: new Date()
+      });
+    } catch (e) {
+      console.error("Firestore Save Error", e);
+    }
+  };
 
   useEffect(() => {
     const syncPlan = async () => {
@@ -59,7 +105,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       setIsSyncing(true);
       try {
         const distilled = await distillPlanFromHistory(messages, user);
-        setPlanData(prev => ({ ...prev, ...distilled }));
+        const newPlan = { ...planData, ...distilled };
+        setPlanData(newPlan);
+        saveToFirestore(messages, newPlan);
       } catch (e) { console.error(e); } finally { setIsSyncing(false); }
     };
     const t = setTimeout(syncPlan, 1500);
@@ -68,11 +116,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
   const handleSendMessage = async (text: string) => {
     const uMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text, timestamp: new Date() };
-    setMessages(prev => [...prev, uMsg]);
+    const newHistory = [...messages, uMsg];
+    setMessages(newHistory);
     setIsLoading(true);
     try {
       const res = await sendMessageToMentor(text);
-      setMessages(prev => [...prev, { id: (Date.now()+1).toString(), role: 'model', text: res, timestamp: new Date() }]);
+      const mMsg: ChatMessage = { id: (Date.now()+1).toString(), role: 'model', text: res, timestamp: new Date() };
+      const updatedHistory = [...newHistory, mMsg];
+      setMessages(updatedHistory);
+      saveToFirestore(updatedHistory, planData);
     } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
 
@@ -94,7 +146,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   return (
     <div className="flex h-screen text-slate-100 overflow-hidden font-sans bg-transparent">
       
-      {/* Sidebar Stylisée Trigenys (Cyber Blue) */}
       <aside className="w-28 lg:w-80 bg-slate-950/60 backdrop-blur-xl border-r border-sky-900/30 flex flex-col py-10 px-6">
         <div className="mb-16 flex flex-col items-center lg:items-start lg:pl-4">
            <ApexLogo className="w-12 h-12 mb-4" />
@@ -130,7 +181,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         <div className="pt-10 border-t border-sky-900/30 flex flex-col gap-6">
            <div className="hidden lg:flex flex-col gap-1 pl-4">
               <span className="text-[8px] font-black text-slate-700 uppercase tracking-widest">Active Agent</span>
-              <span className="text-xs font-bold text-slate-400">{user.name}</span>
+              <span className="text-xs font-bold text-slate-400 truncate max-w-[150px]">{user.name}</span>
            </div>
            <button onClick={onLogout} className="flex items-center gap-4 p-5 text-slate-700 hover:text-red-500 transition-colors rounded-2xl">
              <LogOut className="w-6 h-6" />
@@ -139,14 +190,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         </div>
       </aside>
 
-      {/* Main Content View */}
       <main className="flex-1 relative overflow-hidden bg-transparent">
         {activeTab === 'pilotage' && (
           <div className="p-12 h-full overflow-y-auto space-y-16 animate-fadeIn">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                <div className="space-y-4">
                   <div className="trigenys-signature text-sky-500/40 flex items-center gap-2">
-                    HUD VERSION 4.2.1 // 
+                    HUD VERSION 4.2.1 // CLOUD SYNCED
                     <span className="font-signature text-xl text-sky-500/60 italic lowercase tracking-normal">by</span>
                     GLOBAL INFRASTRUCTURE
                   </div>
@@ -154,11 +204,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                     Mission <span className="text-gradient-stealth italic font-signature lowercase text-7xl">Control</span>
                   </h1>
                </div>
-               <div className="glass-apex px-10 py-6 rounded-[2rem] border-sky-500/20 text-center">
-                  <span className="block text-[9px] text-sky-500/60 uppercase tracking-[0.4em] font-black mb-2">Completion Altitude</span>
-                  <span className="text-4xl font-display font-bold text-sky-400 apex-glow">
-                    {Math.round(Object.values(planData).reduce((acc, curr) => acc + (curr?.completion || 0), 0) / 6)}%
-                  </span>
+               <div className="flex gap-4">
+                  <div className="glass-apex px-10 py-6 rounded-[2rem] border-sky-500/20 text-center">
+                    <span className="block text-[9px] text-sky-500/60 uppercase tracking-[0.4em] font-black mb-2">Altitude</span>
+                    <span className="text-4xl font-display font-bold text-sky-400 apex-glow">
+                      {Math.round(Object.values(planData).reduce((acc, curr) => acc + (curr?.completion || 0), 0) / 6)}%
+                    </span>
+                  </div>
                </div>
             </header>
 
@@ -207,13 +259,29 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                      Secure Communication Link
                    </div>
                 </div>
-                {isSyncing && <div className="text-[9px] font-black text-sky-400 animate-pulse tracking-[0.4em] uppercase">Encrypting Blueprint...</div>}
+                {isSyncing ? (
+                   <div className="flex items-center gap-3">
+                      <RefreshCw className="w-3 h-3 text-sky-400 animate-spin" />
+                      <div className="text-[9px] font-black text-sky-400 tracking-[0.4em] uppercase">Syncing to Cloud...</div>
+                   </div>
+                ) : (
+                  <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Connection Stable</div>
+                )}
              </div>
              <ChatInterface messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
            </div>
         )}
         
-        {activeTab === 'studio' && <div className="p-16 h-full overflow-y-auto max-w-6xl mx-auto"><PlanView activeSection={activePlanSection} planData={planData as any} userName={user.name} /></div>}
+        {activeTab === 'studio' && (
+          <div className="p-16 h-full overflow-y-auto max-w-6xl mx-auto">
+            <PlanView 
+              activeSection={activePlanSection} 
+              planData={planData as any} 
+              user={user as UserProfile}
+              history={messages}
+            />
+          </div>
+        )}
         {activeTab === 'simulation' && <div className="p-16 h-full overflow-y-auto"><SimulationCharts user={user} /></div>}
       </main>
     </div>

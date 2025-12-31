@@ -19,10 +19,10 @@
               apex: {
                 50: '#f0f9ff',
                 100: '#e0f2fe',
-                400: '#0ea5e9', // Bleu Cyber (Radar)
+                400: '#0ea5e9',
                 500: '#0284c7',
                 600: '#0369a1',
-                accent: '#fbbf24' // Or pur
+                accent: '#fbbf24'
               }
             },
             fontFamily: {
@@ -80,6 +80,10 @@
         100% { transform: scale(1.5); opacity: 0; }
       }
       .animate-radar { animation: radar-scan 4s infinite ease-out; }
+
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 10px; }
     </style>
   <script type="importmap">
 {
@@ -92,7 +96,11 @@
     "recharts": "https://esm.sh/recharts@^3.5.1",
     "react-markdown": "https://esm.sh/react-markdown@^10.1.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "jspdf": "https://esm.sh/jspdf@^2.5.1"
+    "jspdf": "https://esm.sh/jspdf@^2.5.1",
+    "firebase/app": "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js",
+    "firebase/": "https://esm.sh/firebase@^12.7.0/"
   }
 }
 </script>

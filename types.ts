@@ -8,6 +8,7 @@ export interface UserProfile {
   industry?: string;
   stage?: BusinessStage;
   businessType?: BusinessType;
+  collaborators?: string[]; // Nouvelle propriété
   mainGoal?: string;
 }
 

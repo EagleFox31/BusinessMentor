@@ -56,7 +56,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </h1>
           
           <p className="max-w-xl text-xl text-slate-400 mb-14 leading-relaxed font-light">
-            Déployez vos ailes sur les marchés mondiaux. La vision souveraine d'**Apex Horus** transforme votre intuition en empire structuré.
+            Déployez vos ailes sur les marchés mondiaux. La vision souveraine d'<span className="font-bold text-white italic">Apex Horus</span> transforme votre intuition en empire structuré.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center gap-8 animate-fadeIn" style={{animationDelay: '300ms'}}>
