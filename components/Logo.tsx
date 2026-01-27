@@ -3,11 +3,13 @@ import React from 'react';
 
 interface LogoProps {
   className?: string;
+  // Added onClick prop to support navigation/actions from Logo
+  onClick?: () => void;
 }
 
-export const ApexLogo: React.FC<LogoProps> = ({ className = "w-10 h-10" }) => {
+export const ApexLogo: React.FC<LogoProps> = ({ className = "w-10 h-10", onClick }) => {
   return (
-    <div className={`relative ${className} group`}>
+    <div className={`relative ${className} group`} onClick={onClick}>
       <svg 
         viewBox="0 0 100 100" 
         fill="none" 

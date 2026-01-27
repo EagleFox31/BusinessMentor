@@ -1,13 +1,24 @@
 
-import React from 'react';
-import { ArrowRight, ShieldCheck, TrendingUp, Eye, Target } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, ShieldCheck, TrendingUp, Eye, Target, Play } from 'lucide-react';
 import { ApexLogo } from './Logo';
 
 interface LandingPageProps {
   onStart: () => void;
+  onResume?: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onStart, onResume }) => {
+  const [hasExistingSession, setHasExistingSession] = useState(false);
+
+  useEffect(() => {
+    const local = localStorage.getItem('apex_local_user');
+    const admin = localStorage.getItem('apex_admin_user');
+    if (local || admin) {
+      setHasExistingSession(true);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-transparent text-slate-100 font-sans overflow-x-hidden flex flex-col">
       
@@ -24,23 +35,32 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               Trigenys Group
             </div>
           </div>
-          <button 
-            onClick={onStart}
-            className="group px-8 py-3 rounded-full bg-apex-400 text-abyss font-black text-xs uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-apex-500/20 flex items-center gap-3"
-          >
-            Accès Pilote <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+          <div className="flex items-center gap-4">
+            {hasExistingSession && (
+              <button 
+                onClick={onResume}
+                className="hidden sm:flex items-center gap-2 px-6 py-2 rounded-full border border-sky-400/30 text-sky-400 font-black text-[10px] uppercase tracking-widest hover:bg-sky-400/10 transition-all"
+              >
+                Reprendre Session
+              </button>
+            )}
+            <button 
+              onClick={onStart}
+              className="group px-8 py-3 rounded-full bg-apex-400 text-abyss font-black text-xs uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-apex-500/20 flex items-center gap-3"
+            >
+              Accès Pilote <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* Hero Section avec Visuel Faucon */}
+      {/* Hero Section */}
       <section className="relative pt-40 pb-20 lg:pt-56 lg:pb-40 px-6 min-h-screen flex items-center">
-        {/* Falcon Backdrop */}
         <div className="absolute top-0 right-0 w-full h-full pointer-events-none overflow-hidden opacity-30 falcon-mask">
           <img 
             src="https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5b?q=80&w=2070&auto=format&fit=crop" 
             alt="Falcon Eye" 
-            className="w-full h-full object-cover object-center scale-110 reveal-image"
+            className="w-full h-full object-cover object-center scale-110"
           />
         </div>
 
@@ -59,22 +79,31 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             Déployez vos ailes sur les marchés mondiaux. La vision souveraine d'<span className="font-bold text-white italic">Apex Horus</span> transforme votre intuition en empire structuré.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center gap-8 animate-fadeIn" style={{animationDelay: '300ms'}}>
+          <div className="flex flex-col sm:flex-row items-center gap-8 animate-fadeIn">
             <button 
               onClick={onStart}
               className="group px-12 py-6 bg-apex-400 text-abyss rounded-2xl font-black text-xl transition-all transform hover:scale-105 shadow-2xl shadow-apex-500/40 flex items-center gap-4"
             >
               INITIALISER MA VISION <ArrowRight className="w-6 h-6" />
             </button>
-            <div className="flex flex-col items-start">
-               <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Technologie Propriétaire</span>
-               <span className="font-signature text-3xl text-sky-400/90 italic">by Trigenys Group</span>
-            </div>
+            {hasExistingSession ? (
+              <button 
+                onClick={onResume}
+                className="group px-8 py-6 glass-apex text-white rounded-2xl font-bold flex items-center gap-4 border border-white/10 hover:border-sky-400 transition-all"
+              >
+                <Play className="w-6 h-6 text-sky-400 fill-sky-400" /> REPRENDRE LA MISSION
+              </button>
+            ) : (
+              <div className="flex flex-col items-start">
+                 <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Technologie Propriétaire</span>
+                 <span className="font-signature text-3xl text-sky-400/90 italic">by Trigenys Group</span>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Features Grid avec Icônes Stylisées */}
+      {/* Features Grid */}
       <section className="py-32 bg-transparent border-t border-white/5 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
